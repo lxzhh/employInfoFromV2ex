@@ -32,7 +32,21 @@ def getTagsFromTitle(title)
   f.each_line do |line|
     jobs << line.chomp if title.downcase.include? line.chomp.downcase
   end
+  puts " in tag #{jobs.join ','}"
   jobs.join ","
+end
+
+
+
+def getCityNamesOfTitle(title)
+  f1 = File.open("#{Dir.pwd}/newMainCities.txt", "r")
+  cityNames = []
+  f1.each_line do |line|
+     cityNames << line.chomp if title.include? line.chomp
+  end
+   puts " in city #{cityNames.join ','}"
+   cityNames.join ","
+
 end
 
 
@@ -44,32 +58,22 @@ def searchTitle(pageNo)
   # doc.xpath("//span[@class='item_title']").each do |line|
 #     puts line
 #   end
-  f1 = File.open("#{Dir.pwd}/newMainCities.txt", "r")
-  f1.each_line do |cityName|
-    # puts cityName
-    doc.css('span.item_title').each do |line|
-      # puts line
-      # puts line.css('a')[0]["href"].gsub(/\/t\//,'')             #"/t/88755#reply3"
-      if line.text.include?cityName.chomp
 
-        puts "#{line.text} include  #{cityName}"
-        emp = EmpInfo.new
-        emp.infoId = line.css('a')[0]["href"].gsub(/\/t\//,'')
-        emp.city = cityName.chomp
-        emp.job = line.text
-        emp.tag = getTagsFromTitle(emp.job)
-        emp.created_at = Time.now
-        emp.updated_at = Time.now
-        # puts emp
-        emp.save
-      end
+ doc.css('span.item_title').each do |line|
 
+   puts "#{line.text}"
+   emp = EmpInfo.new
+   emp.infoId = line.css('a')[0]["href"].gsub(/\/t\//,'')
+   emp.job = line.text
+   emp.tag = getTagsFromTitle(emp.job)
+   emp.city = getCityNamesOfTitle(emp.job)
 
+   emp.created_at = Time.now
+   emp.updated_at = Time.now
+   # puts emp
+   emp.save
 
-    end
-
-  end
-
+ end
 
 end
 
@@ -87,18 +91,20 @@ end
 # handleCityName
 
 
+# searchTitle(2)
 
-# searchTitle(1)
+(1..20).each do |page|
+  searchTitle(page)
+  sleep(5)
+end
 
 
- (0..4).each {|num|
-   (1..5).each{|page|
-     # puts 5 * num + page
-     searchTitle(5 * num + page)
-     sleep(5)
-   }
 
- }
+
+
+
+
+# puts "[杭州]找iOS,Android开发小伙伴,UI设计师".downcase.include? "android".downcase
 
 
 
